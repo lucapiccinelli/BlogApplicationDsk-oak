@@ -2,11 +2,14 @@ package com.cgm.experiments.blogapplicationdsl
 
 import com.cgm.experiments.blogapplicationdsl.domain.model.Article
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 
@@ -72,6 +75,29 @@ class BlogApplicationDslApplicationTests {
             .andExpect {
                 status { isBadRequest() }
             }
+    }
+
+    @Test
+    fun `can create a new article`() {
+        val expectedArticle = Article(0, "article z", "body of article z")
+
+        val articleStr = client.post("/api/articles"){
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+            content = expectedArticle
+        }
+        .andExpect {
+            status { isCreated() }
+        }.andReturn().response.contentAsString
+
+        val actualArticle = mapper.readValue<Article>(articleStr)
+
+        client.get("/api/articles/${actualArticle.id}")
+            .andExpect {
+                status { isOk() }
+                content { json(mapper.writeValueAsString(actualArticle)) }
+            }
+
     }
 
 }
