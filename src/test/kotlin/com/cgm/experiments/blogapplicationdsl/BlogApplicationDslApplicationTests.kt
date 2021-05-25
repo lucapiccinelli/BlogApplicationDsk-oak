@@ -17,6 +17,10 @@ class BlogApplicationDslApplicationTests {
     private lateinit var client: MockMvc
     private val mapper = jacksonObjectMapper()
 
+    private val expectedArticles = listOf(
+        Article(1,"article x", "body article x"),
+        Article(2,"article y", "body article y"))
+
     @BeforeAll
     internal fun setUp() {
         app = start()
@@ -32,16 +36,25 @@ class BlogApplicationDslApplicationTests {
 
     @Test
     fun `can read all articles`() {
-        val expectedArticles = listOf(
-            Article("article x", "body article x"),
-            Article("article y", "body article y")
-        )
 
-        client.get("/articles")
+        client.get("/api/articles")
             .andExpect {
                 status { isOk() }
                 content { contentType(MediaType.APPLICATION_JSON) }
                 content { json(mapper.writeValueAsString(expectedArticles)) }
+            }
+    }
+
+    @Test
+    fun `can read one article`() {
+        val id = 2
+        val expectedArticle = expectedArticles.first { it.id == id }
+
+        client.get("/api/articles/$id")
+            .andExpect {
+                status { isOk() }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                content { json(mapper.writeValueAsString(expectedArticle)) }
             }
     }
 
