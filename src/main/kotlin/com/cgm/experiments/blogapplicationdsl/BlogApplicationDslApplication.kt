@@ -22,8 +22,8 @@ fun start(args: Array<String> = emptyArray()) =
             bean {
                 router {
                     "api".nest {
-                        GET("/articles", ArticlesHandler::findAll)
-                        GET("/articles/{id}", ArticlesHandler::findOne)
+                        GET("/articles", ArticlesHandler::find)
+                        GET("/articles/{id}", ArticlesHandler::find)
                     }
                 }
             }
@@ -35,14 +35,27 @@ object ArticlesHandler{
         Article(1,"article x", "body article x"),
         Article(2,"article y", "body article y"))
 
-    fun findAll(request: ServerRequest): ServerResponse =
-        ServerResponse.ok()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(articles)
+    fun find(request: ServerRequest): ServerResponse = (request.inPath("id")
+        ?.run(::getOne)
+        ?: okResponse(articles))
 
-    fun findOne(request: ServerRequest): ServerResponse = request.pathVariable("id").let { id ->
-        ServerResponse.ok()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(articles.find { it.id == id.toInt() }!!)
+    private fun getOne(id: String) = (id.toIntOrNull()?.let { intId ->
+        findOne(intId)
+            ?.run(::okResponse)
+            ?: ServerResponse.notFound().build()
+        }
+        ?: ServerResponse.badRequest().build())
+
+    private fun findOne(id: Int): Article? = articles.firstOrNull { it.id == id }
+
+    private fun okResponse(any: Any): ServerResponse = ServerResponse.ok()
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(any)
+
+    private fun ServerRequest.inPath(name: String): String? = try {
+        pathVariable(name)
+    }catch (ex: IllegalArgumentException){
+        null
     }
 }
+

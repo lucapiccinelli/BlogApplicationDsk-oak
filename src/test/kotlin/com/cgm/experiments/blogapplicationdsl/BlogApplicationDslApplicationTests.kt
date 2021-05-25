@@ -58,5 +58,21 @@ class BlogApplicationDslApplicationTests {
             }
     }
 
+    @Test
+    fun `if the article do not exist return not found`() {
+        client.get("/api/articles/9999999")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    fun `if the article id is not a number it returns bad request`() {
+        client.get("/api/articles/badRequestId")
+            .andExpect {
+                status { isBadRequest() }
+            }
+    }
+
 }
 
