@@ -1,23 +1,22 @@
 package com.cgm.experiments.blogapplicationdsl
 
-import com.cgm.experiments.blogapplicationdsl.doors.inbound.routes.ArticlesHandler
-import com.cgm.experiments.blogapplicationdsl.doors.outbound.repositories.InMemoryArticlesRepository
+import com.cgm.experiments.blogapplicationdsl.utils.ServerPort
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.support.BeanDefinitionDsl
-import org.springframework.context.support.beans
-import org.springframework.http.MediaType
-import org.springframework.web.servlet.function.router
 
 @SpringBootApplication
 class BlogApplicationDslApplication
 
 fun main(args: Array<String>) {
-    start(args)
+    start(FixedServerPort(8080), args)
 }
 
-fun start(args: Array<String> = emptyArray(), initializer: (() -> BeanDefinitionDsl)? = null) =
+fun start(port: ServerPort, args: Array<String> = emptyArray(), initializer: (() -> BeanDefinitionDsl)? = null) =
     runApplication<BlogApplicationDslApplication>(*args){
+        mapOf("server.port" to port.value())
+            .run(::setDefaultProperties)
+
         addInitializers(initializer
             ?.run { initializer() }
             ?: initializeContext())

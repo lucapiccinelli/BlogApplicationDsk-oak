@@ -2,6 +2,7 @@ package com.cgm.experiments.blogapplicationdsl
 
 import com.cgm.experiments.blogapplicationdsl.domain.model.Article
 import com.cgm.experiments.blogapplicationdsl.doors.outbound.repositories.InMemoryArticlesRepository
+import com.cgm.experiments.blogapplicationdsl.utils.RandomServerPort
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
@@ -30,7 +31,7 @@ class BlogApplicationDslApplicationTests {
 
     @BeforeAll
     internal fun setUp() {
-        app = start(){
+        app = start(RandomServerPort){
             beans {
                 bean { inMemoryArticlesRepository }
                 articlesRoutes()
