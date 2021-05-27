@@ -1,14 +1,15 @@
 package com.cgm.experiments.blogapplicationdsl
 
 import com.cgm.experiments.blogapplicationdsl.domain.model.Article
+import com.cgm.experiments.blogapplicationdsl.doors.outbound.repositories.InMemoryArticlesRepository
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.*
 import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.context.support.beans
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
@@ -25,9 +26,16 @@ class BlogApplicationDslApplicationTests {
         Article(1,"article x", "body article x"),
         Article(2,"article y", "body article y"))
 
+    private val inMemoryArticlesRepository = InMemoryArticlesRepository()
+
     @BeforeAll
     internal fun setUp() {
-        app = start()
+        app = start(){
+            beans {
+                bean { inMemoryArticlesRepository }
+                articlesRoutes()
+            }
+        }
         client = MockMvcBuilders
             .webAppContextSetup(app as WebApplicationContext)
             .build()
@@ -36,6 +44,11 @@ class BlogApplicationDslApplicationTests {
     @AfterAll
     internal fun tearDown() {
         app.close()
+    }
+
+    @BeforeEach
+    internal fun beforeEach() {
+        inMemoryArticlesRepository.reset(expectedArticles)
     }
 
     @Test
