@@ -40,6 +40,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-jvm</artifactId>
+            <version>4.0.7</version>
+        </dependency>
     </dependencies>
 
     <build>

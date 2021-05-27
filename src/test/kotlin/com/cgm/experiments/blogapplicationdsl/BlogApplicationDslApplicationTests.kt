@@ -3,11 +3,12 @@ package com.cgm.experiments.blogapplicationdsl
 import com.cgm.experiments.blogapplicationdsl.domain.model.Article
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.*
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
@@ -40,12 +41,7 @@ class BlogApplicationDslApplicationTests {
     @Test
     fun `can read all articles`() {
 
-        client.get("/api/articles")
-            .andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                content { json(mapper.writeValueAsString(expectedArticles)) }
-            }
+        getOk("/api/articles", expectedArticles)
     }
 
     @Test
@@ -53,12 +49,7 @@ class BlogApplicationDslApplicationTests {
         val id = 2
         val expectedArticle = expectedArticles.first { it.id == id }
 
-        client.get("/api/articles/$id")
-            .andExpect {
-                status { isOk() }
-                content { contentType(MediaType.APPLICATION_JSON) }
-                content { json(mapper.writeValueAsString(expectedArticle)) }
-            }
+        getOk("/api/articles/${id}", expectedArticle)
     }
 
     @Test
@@ -81,24 +72,28 @@ class BlogApplicationDslApplicationTests {
     fun `can create a new article`() {
         val expectedArticle = Article(0, "article z", "body of article z")
 
-        val articleStr = client.post("/api/articles"){
+        val response = client.post("/api/articles"){
             contentType = MediaType.APPLICATION_JSON
             accept = MediaType.APPLICATION_JSON
-            content = expectedArticle
+            content = mapper.writeValueAsString(expectedArticle)
         }
         .andExpect {
             status { isCreated() }
-        }.andReturn().response.contentAsString
+        }.andReturn().response
 
+        val articleStr = response.contentAsString
         val actualArticle = mapper.readValue<Article>(articleStr)
 
-        client.get("/api/articles/${actualArticle.id}")
-            .andExpect {
-                status { isOk() }
-                content { json(mapper.writeValueAsString(actualArticle)) }
-            }
+        response.getHeaderValue("Location") shouldBe "http://localhost/api/articles/${actualArticle.id}"
 
+        getOk("/api/articles/${actualArticle.id}", actualArticle)
     }
+
+    private fun <T> getOk(url: String, expected: T) = client.get(url)
+        .andExpect {
+            status { isOk() }
+            content { json(mapper.writeValueAsString(expected)) }
+        }
 
 }
 
