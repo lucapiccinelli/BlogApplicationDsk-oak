@@ -26,11 +26,7 @@ class ExposedArticlesRepositoryTests {
 
     @BeforeAll
     internal fun setUp() {
-        app = start(RandomServerPort){
-            beans {
-                connectToH2FromEnv()
-            }
-        }
+        app = start(RandomServerPort)
 
         transaction {
             SchemaUtils.create(ArticleEntity)
