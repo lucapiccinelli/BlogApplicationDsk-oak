@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="createSchema" author="silvana.bonicelli">
+        <sql endDelimiter=";">
+            CREATE SCHEMA blog
+        </sql>
+    </changeSet>
+    <changeSet id="create_article_table" author="silvana.bonicelli">
+        <createTable
+            tableName="articles"
+            schemaName="blog"
+        >
+            <column name="id" type="int" autoIncrement="true">
+                <constraints
+                    primaryKey="true"
+                    nullable="false"
+                    uniqueConstraintName="PK_articles_table"
+                />
+            </column>
+            <column name="title" type="varchar">
+                <constraints nullable="false" />
+            </column>
+            <column name="body" type="varchar">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

@@ -7,6 +7,7 @@ import com.cgm.experiments.blogapplicationdsl.doors.outbound.repositories.InMemo
 import com.cgm.experiments.blogapplicationdsl.doors.outbound.repositories.exposed.ExposedArticlesRepository
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import liquibase.integration.spring.SpringLiquibase
 import org.jetbrains.exposed.sql.Database
 import org.springframework.context.support.BeanDefinitionDsl
 import org.springframework.context.support.beans
@@ -18,6 +19,20 @@ import javax.sql.DataSource
 fun initializeContext(): BeanDefinitionDsl = beans {
     articlesRoutes()
     connectToH2FromEnv()
+
+    env["app.liquibase.change-log"]
+        ?.run(::enableLiquibase)
+        ?: println("Mi attendevo la property app.liquibase.change-log per inizializzare lo schema, ma non c'e'")
+
+}
+
+fun BeanDefinitionDsl.enableLiquibase (filepath: String) {
+    bean {
+        SpringLiquibase().apply{
+            changeLog = filepath
+            dataSource = ref()
+        }
+    }
 }
 
 fun BeanDefinitionDsl.connectToDb(connectionString: String, driver: String, username: String?, password: String?) {
@@ -30,7 +45,7 @@ fun BeanDefinitionDsl.connectToDb(connectionString: String, driver: String, user
     }
     val datasource = HikariDataSource(config)
     Database.connect(datasource)
-    
+
     bean { ExposedArticlesRepository() }
     bean<DataSource> { datasource }
 }

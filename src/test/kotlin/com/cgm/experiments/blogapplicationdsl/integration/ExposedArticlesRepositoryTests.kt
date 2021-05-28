@@ -5,6 +5,7 @@ import com.cgm.experiments.blogapplicationdsl.domain.model.Article
 import com.cgm.experiments.blogapplicationdsl.doors.outbound.entities.exposed.ArticleDao
 import com.cgm.experiments.blogapplicationdsl.doors.outbound.entities.exposed.ArticleEntity
 import com.cgm.experiments.blogapplicationdsl.doors.outbound.repositories.exposed.ExposedArticlesRepository
+import com.cgm.experiments.blogapplicationdsl.enableLiquibase
 import com.cgm.experiments.blogapplicationdsl.helpers.TestHelpers
 import com.cgm.experiments.blogapplicationdsl.start
 import com.cgm.experiments.blogapplicationdsl.utils.RandomServerPort
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.support.beans
+import org.springframework.core.env.get
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ExposedArticlesRepositoryTests {
@@ -26,7 +28,12 @@ class ExposedArticlesRepositoryTests {
 
     @BeforeAll
     internal fun setUp() {
-        app = start(RandomServerPort)
+        app = start(RandomServerPort){
+            beans {
+                connectToH2FromEnv()
+                enableLiquibase("classpath:/liquibase/db-changelog-master.xml")
+            }
+        }
 
         transaction {
             SchemaUtils.create(ArticleEntity)
