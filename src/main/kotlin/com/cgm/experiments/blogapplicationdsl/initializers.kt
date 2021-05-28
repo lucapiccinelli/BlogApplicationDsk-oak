@@ -30,9 +30,9 @@ fun BeanDefinitionDsl.connectToDb(connectionString: String, driver: String, user
     }
     val datasource = HikariDataSource(config)
     Database.connect(datasource)
-
-//    bean { datasource }
+    
     bean { ExposedArticlesRepository() }
+    bean<DataSource> { datasource }
 }
 
 fun BeanDefinitionDsl.connectToH2FromEnv() {
