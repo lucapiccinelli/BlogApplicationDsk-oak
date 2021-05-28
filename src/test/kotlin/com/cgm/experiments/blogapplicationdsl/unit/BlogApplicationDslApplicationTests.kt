@@ -1,7 +1,10 @@
-package com.cgm.experiments.blogapplicationdsl
+package com.cgm.experiments.blogapplicationdsl.unit
 
+import com.cgm.experiments.blogapplicationdsl.articlesRoutes
 import com.cgm.experiments.blogapplicationdsl.domain.model.Article
 import com.cgm.experiments.blogapplicationdsl.doors.outbound.repositories.InMemoryArticlesRepository
+import com.cgm.experiments.blogapplicationdsl.helpers.TestHelpers
+import com.cgm.experiments.blogapplicationdsl.start
 import com.cgm.experiments.blogapplicationdsl.utils.RandomServerPort
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -23,9 +26,7 @@ class BlogApplicationDslApplicationTests {
     private lateinit var client: MockMvc
     private val mapper = jacksonObjectMapper()
 
-    private val expectedArticles = listOf(
-        Article(1,"article x", "body article x"),
-        Article(2,"article y", "body article y"))
+    private val expectedArticles = TestHelpers.articles
 
     private val inMemoryArticlesRepository = InMemoryArticlesRepository()
 
