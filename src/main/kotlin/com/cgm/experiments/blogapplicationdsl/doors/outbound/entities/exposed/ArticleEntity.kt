@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 
-object ArticleEntity: IntIdTable(){
+object ArticleEntity: IntIdTable("blog.articles"){
     val title = varchar("title", 50)
     val body = varchar("body", 2000)
 }
