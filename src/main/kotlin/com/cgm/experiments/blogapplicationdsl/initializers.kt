@@ -1,7 +1,5 @@
 package com.cgm.experiments.blogapplicationdsl
 
-import com.cgm.experiments.blogapplicationdsl.domain.Repository
-import com.cgm.experiments.blogapplicationdsl.domain.model.Article
 import com.cgm.experiments.blogapplicationdsl.doors.inbound.routes.ArticlesHandler
 import com.cgm.experiments.blogapplicationdsl.doors.outbound.repositories.InMemoryArticlesRepository
 import com.cgm.experiments.blogapplicationdsl.doors.outbound.repositories.exposed.ExposedArticlesRepository
@@ -13,8 +11,27 @@ import org.springframework.context.support.BeanDefinitionDsl
 import org.springframework.context.support.beans
 import org.springframework.core.env.get
 import org.springframework.http.MediaType
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.web.servlet.function.router
 import javax.sql.DataSource
+
+fun BeanDefinitionDsl.enableSecurity () {
+    bean {
+        object : WebSecurityConfigurerAdapter(){
+            override fun configure(http: HttpSecurity) {
+                http
+                    .authorizeRequests { authz ->
+                        authz
+                            .antMatchers("/api/**").hasAuthority("ROLE_ADMIN")
+                            .antMatchers("/public/**").permitAll()
+                            .antMatchers("/**").denyAll()
+                    }
+                    .httpBasic()
+            }
+        }
+    }
+}
 
 fun initializeContext(): BeanDefinitionDsl = beans {
     articlesRoutes()
