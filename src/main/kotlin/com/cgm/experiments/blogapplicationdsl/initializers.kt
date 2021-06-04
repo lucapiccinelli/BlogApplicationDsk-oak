@@ -16,6 +16,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.web.servlet.function.router
 import javax.sql.DataSource
 
+fun initializeContext(): BeanDefinitionDsl = beans {
+    articlesRoutes()
+    connectToH2FromEnv()
+
+    env["app.liquibase.change-log"]
+        ?.run(::enableLiquibase)
+        ?: println("Mi attendevo la property app.liquibase.change-log per inizializzare lo schema, ma non c'e'")
+
+}
+
 fun BeanDefinitionDsl.enableSecurity () {
     bean {
         object : WebSecurityConfigurerAdapter(){
@@ -31,16 +41,6 @@ fun BeanDefinitionDsl.enableSecurity () {
             }
         }
     }
-}
-
-fun initializeContext(): BeanDefinitionDsl = beans {
-    articlesRoutes()
-    connectToH2FromEnv()
-
-    env["app.liquibase.change-log"]
-        ?.run(::enableLiquibase)
-        ?: println("Mi attendevo la property app.liquibase.change-log per inizializzare lo schema, ma non c'e'")
-
 }
 
 fun BeanDefinitionDsl.enableLiquibase (filepath: String) {
