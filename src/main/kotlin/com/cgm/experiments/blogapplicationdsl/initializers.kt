@@ -13,7 +13,10 @@ import org.springframework.core.env.get
 import org.springframework.http.MediaType
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.servlet.function.router
+import java.time.LocalDateTime
 import javax.sql.DataSource
 
 fun initializeContext(): BeanDefinitionDsl = beans {
@@ -33,7 +36,7 @@ fun BeanDefinitionDsl.enableSecurity () {
                 http
                     .authorizeRequests { authz ->
                         authz
-                            .antMatchers("/api/**").hasAuthority("ROLE_ADMIN")
+                            .antMatchers("/api/**").hasAnyAuthority("ROLE_ADMIN")
                             .antMatchers("/public/**").permitAll()
                             .antMatchers("/**").denyAll()
                     }
